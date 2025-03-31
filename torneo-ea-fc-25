@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EA SPORTS FC 25 - TOURNAMENT MANAGER</title>
+  <style>
+    /* Estilos EA FC 25 */
+    :root {
+      /* Ajusta los offsets de cada encabezado de forma independiente */
+      --header-offset-R1: 12px;
+      --header-offset-R2: 5px;
+      --header-offset-R3: 10px;
+      --header-offset-R4: 22px;
+      --header-offset-R5: 247px;
+      --header-offset-R6: -110px;
+    }
+    body, h1, h2, label, button {
+      text-transform: uppercase;
+      font-family: 'EA Sports Text', 'Segoe UI', system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a0e1a, #1a2232);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      overflow-x: hidden;
+    }
+
+    .header-container {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: -80px;
+      text-align: center;
+      padding: 5px;
+      background: rgba(10, 20, 30, 0.9);
+      border: 2px solid #00ffd5;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 213, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg,
+        transparent 0%,
+        rgba(0, 255, 213, 0.05) 50%,
+        transparent 100%);
+      pointer-events: none;
+    }
+
+    .header-container h1 {
+      color: #00ffd5;
+      font-size: 1.5rem;
+      text-shadow: 0 0 5px rgba(0, 255, 213, 0.3);
+      letter-spacing: 2px;
+      background: linear-gradient(to right, #00ffd5, #0077ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 10px 0;
+    }
+
+    .bracket-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      width: 100%;
+      max-width: 1800px;
+      margin-bottom: 10px;
+      position: relative;
+      background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==');
+    }
+
+    .bracket-half {
+      flex: 1;
+      height: 900px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    #rightBracket {
+      flex-direction: row-reverse;
+    }
+
+    .round-column {
+      flex: 0.8;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      padding: 0 5px;
+      margin: 0 2px;
+      position: relative;
+    }
+
+    .round-column.small-round {
+      flex: 1;
+      min-width: 70px;
+    }
+
+    #left_R1, #right_R1 {
+      min-width: 60px;
+    }
+
+    /* Encabezados de cada columna, se les asignarán clases específicas para posicionarlos de forma independiente */
+    .round-column h2 {
+      font-size: 0.9rem;
+      text-align: center;
+      margin: 8px 0;
+      color: #fff;
+      background: linear-gradient(to right, #0077ff, #00ffd5);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(0, 255, 213, 0.3);
+      border: 1px solid rgba(0, 255, 213, 0.5);
+      position: relative;
+    }
+    .round-column h2.header-R1 { top: var(--header-offset-R1, 0px); }
+    .round-column h2.header-R2 { top: var(--header-offset-R2, 0px); }
+    .round-column h2.header-R3 { top: var(--header-offset-R3, 0px); }
+    .round-column h2.header-R4 { top: var(--header-offset-R4, 0px); }
+    .round-column h2.header-R5 { top: var(--header-offset-R5, 0px); }
+    .round-column h2.header-R6 { top: var(--header-offset-R6, 0px); }
+
+    .bracket-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 250px;
+      margin: 0 10px;
+      opacity: 1;
+    }
+
+    .match {
+      background: rgba(10, 20, 30, 0.9);
+      border: 2px solid #0077ff;
+      border-radius: 10px;
+      padding: 1px;
+      margin: 1px 0;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      animation: matchAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      box-shadow: 0 4px 12px rgba(0, 119, 255, 0.2);
+      transition: all 0.2s ease;
+      min-height: 90px;
+      position: relative;
+      overflow: visible;
+    }
+
+    /* Animación de brillo para los partidos ganadores */
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 5px #00ffd5;
+      }
+      50% {
+        box-shadow: 0 0 20px #00ffd5;
+      }
+      100% {
+        box-shadow: 0 0 5px #00ffd5;
+      }
+    }
+
+    /* Clase para aplicar el brillo a los partidos ganadores */
+    .match.winner {
+      animation: glow 1.5s infinite alternate;
+    }
+
+    .match::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0077ff 0%, #00ffd5 100%);
+    }
+
+    .match:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 119, 255, 0.4);
+    }
+
+    @keyframes matchAppear {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .team {
+      padding: 6px 4px;
+      border-bottom: 1px solid rgba(0, 255, 213, 0.2);
+      text-align: center;
+      position: relative;
+      font-size: 0.6rem;
+      transition: all 0.2s ease;
+      min-height: 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      margin: 1px -2px;
+    }
+
+    .team:last-child {
+      border-bottom: none;
+    }
+
+    .team.winner {
+      background: linear-gradient(145deg, rgba(0, 255, 213, 0.15), rgba(0, 119, 255, 0.3));
+      color: #00ffd5;
+      font-weight: 700;
+      border-radius: 6px;
+      animation: winnerPulse 0.5s ease;
+      border: 1px solid rgba(0, 255, 213, 0.5);
+      padding: 6px 4px;
+      margin: 1px -2px;
+    }
+
+    .team.loser {
+      background: linear-gradient(145deg, rgba(255, 0, 55, 0.15), rgba(153, 0, 255, 0.3));
+      color: #ff004c;
+      font-weight: 700;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 0, 55, 0.5);
+      padding: 6px 4px;
+      margin: 1px -2px;
+    }
+
+    .checkboxes {
+      margin-top: 6px;
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .checkboxes input {
+      transform: scale(.7);
+      cursor: pointer;
+      accent-color: #00ffd5;
+      transition: all 0.2s ease;
+      margin: 0 1px;
+      filter: drop-shadow(0 0 2px rgba(0, 255, 213, 0.5));
+    }
+
+    .checkboxes input:checked {
+      transform: scale(1.2);
+      accent-color: #0077ff;
+    }
+
+    .checkboxes input:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .signature {
+      position: fixed;
+      bottom: 15px;
+      right: 20px;
+      font-size: 0.9rem;
+      color: rgba(0, 255, 213, 0.7);
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(0, 255, 213, 0.3);
+    }
+
+    #center_R5 .match {
+      margin-bottom: 50px;
+    }
+
+    #center_R6 .match {
+      margin-top: 50px;
+    }
+
+    @keyframes winnerPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    .eafc-glow {
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 0px #00ffd5, 0 0 0px #00ffd5, 0 0 0px #0077ff;
+      }
+      to {
+        text-shadow: 0 0 0px #00ffd5, 0 0 0px #00ffd5, 0 0 0px #0077ff;
+      }
+    }
+
+    /* Estilos responsive para móviles */
+    @media (max-width: 768px) {
+      .bracket-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .bracket-half {
+        height: auto;
+        flex-direction: column !important;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .round-column {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .match {
+        width: 45%;
+        margin: 5px;
+      }
+
+      .bracket-center {
+        width: 100%;
+        margin: 20px 0;
+        flex-direction: row;
+      }
+
+      .header-container {
+        margin-bottom: 20px;
+      }
+
+      .header-container h1 {
+        font-size: 1.2rem;
+      }
+    }
+
+    /* Botón de reinicio */
+    .reset-button {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      background: rgba(255, 0, 55, 0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(255, 0, 55, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .reset-button:hover {
+      background: rgba(255, 0, 55, 0.9);
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header-container">
+    <h1><span class="eafc-glow">⚽ EA SPORTS FC 25</span> - TORNEO PLAZA LAS AMERICAS</h1>
+  </div>
+
+  <div class="bracket-container" id="bracketContainer">
+    <div class="bracket-half" id="leftBracket">
+      <div class="round-column small-round" id="left_R1"></div>
+      <div class="round-column small-round" id="left_R2"></div>
+      <div class="round-column small-round" id="left_R3"></div>
+      <div class="round-column small-round" id="left_R4"></div>
+    </div>
+
+    <div class="bracket-center" id="centerBracket">
+      <div class="round-column" id="center_R5"></div>
+      <div class="round-column" id="center_R6"></div>
+    </div>
+
+    <div class="bracket-half" id="rightBracket">
+      <div class="round-column small-round" id="right_R1"></div>
+      <div class="round-column small-round" id="right_R2"></div>
+      <div class="round-column small-round" id="right_R3"></div>
+      <div class="round-column small-round" id="right_R4"></div>
+    </div>
+  </div>
+
+  <button class="reset-button" id="resetButton" title="Reiniciar torneo">↻</button>
+
+  <div class="signature"></div>
+
+  <script>
+    // Estado del torneo
+    let tournamentState = {
+      equipos: [
+        'Equipo 1', 'Equipo 2', 'Equipo 3', 'Equipo 4',
+        'Equipo 5', 'Equipo 6', 'Equipo 7', 'Equipo 8',
+        'Equipo 9', 'Equipo 10', 'Equipo 11', 'Equipo 12',
+        'Equipo 13', 'Equipo 14', 'Equipo 15', 'Equipo 16',
+        'Equipo 17', 'Equipo 18', 'Equipo 19', 'Equipo 20',
+        'Equipo 21', 'Equipo 22', 'Equipo 23', 'Equipo 24',
+        'Equipo 25', 'Equipo 26', 'Equipo 27', 'Equipo 28',
+        'Equipo 29', 'Equipo 30', 'Equipo 31', 'Equipo 32'
+      ],
+      resultados: {},
+      config: {
+        umbralNormal: 2,
+        umbralFinal: 3
+      }
+    };
+
+    let matchesElements = {};
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configurar botón de reinicio
+      document.getElementById('resetButton').addEventListener('click', function() {
+        if(confirm('¿Estás seguro de que quieres reiniciar el torneo? Se perderán todos los datos.')) {
+          reiniciarTorneo();
+        }
+      });
+
+      // Verificar si hay un torneo guardado
+      const savedData = localStorage.getItem('eafc25_tournament');
+      if(savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          tournamentState = data;
+
+          // Inicializar con datos guardados
+          inicializarBracket();
+          cargarResultadosGuardados();
+        } catch(e) {
+          console.error('Error al cargar torneo guardado:', e);
+          inicializarBracket();
+        }
+      } else {
+        inicializarBracket();
+      }
+    });
+
+    function guardarTorneo() {
+      // Recopilar todos los resultados actuales
+      const resultados = {};
+
+      Object.keys(matchesElements).forEach(key => {
+        const matchId = matchesElements[key].dataset.matchId;
+        const team = matchesElements[key].dataset.team;
+
+        if(!resultados[matchId]) resultados[matchId] = {};
+
+        const checkboxes = matchesElements[key].querySelectorAll('input[type="checkbox"]');
+        const checks = Array.from(checkboxes).map(cb => cb.checked);
+
+        resultados[matchId][team] = {
+          checks: checks,
+          className: matchesElements[key].className
+        };
+
+        // Guardar también el nombre del equipo
+        if(matchesElements[key].querySelector('.team-name')) {
+          resultados[matchId][team].nombre = matchesElements[key].querySelector('.team-name').textContent;
+        }
+      });
+
+      tournamentState.resultados = resultados;
+
+      // Guardar en localStorage
+      localStorage.setItem('eafc25_tournament', JSON.stringify(tournamentState));
+    }
+
+    function cargarResultadosGuardados() {
+      if(!tournamentState.resultados) return;
+
+      Object.keys(tournamentState.resultados).forEach(matchId => {
+        Object.keys(tournamentState.resultados[matchId]).forEach(team => {
+          const teamData = tournamentState.resultados[matchId][team];
+          const teamElement = matchesElements[`${matchId}_${team}`];
+
+          if(teamElement) {
+            // Restaurar nombre del equipo
+            if(teamData.nombre && teamElement.querySelector('.team-name')) {
+              teamElement.querySelector('.team-name').textContent = teamData.nombre;
+            }
+
+            // Restaurar checkboxes
+            if(teamData.checks) {
+              const checkboxes = teamElement.querySelectorAll('input[type="checkbox"]');
+              teamData.checks.forEach((checked, index) => {
+                if(checkboxes[index]) {
+                  checkboxes[index].checked = checked;
+                  if(checked) {
+                    // Disparar evento change para actualizar estado
+                    const event = new Event('change');
+                    checkboxes[index].dispatchEvent(event);
+                  }
+                }
+              });
+            }
+
+            // Restaurar clases
+            if(teamData.className) {
+              teamElement.className = 'team ' + teamData.className.split(' ').filter(c => c === 'winner' || c === 'loser').join(' ');
+            }
+          }
+        });
+      });
+    }
+
+    function reiniciarTorneo() {
+      // Limpiar contenedores
+      document.querySelectorAll('.round-column').forEach(col => {
+        col.innerHTML = '';
+      });
+
+      // Reiniciar estado
+      matchesElements = {};
+      tournamentState.resultados = {};
+
+      // Limpiar localStorage
+      localStorage.removeItem('eafc25_tournament');
+
+      // Volver a inicializar
+      inicializarBracket();
+    }
+
+    function inicializarBracket() {
+      const equiposIzq = shuffleArray(tournamentState.equipos.slice(0, 16));
+      const equiposDer = shuffleArray(tournamentState.equipos.slice(16, 32));
+
+      renderRound('left', 'R1', equiposIzq, 3);
+      renderRound('right', 'R1', equiposDer, 3);
+
+      document.getElementById('bracketContainer').style.display = 'flex';
+
+      // Animar aparición
+      anime({
+        targets: '.match',
+        delay: anime.stagger(50),
+        duration: 600,
+        easing: 'easeOutElastic(1, .5)',
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        translateY: [20, 0]
+      });
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function renderRound(side, round, data, numCheckboxes) {
+      const containerId = `${side}_${round}`;
+      let container = document.getElementById(containerId);
+
+      if (!container) {
+        container = document.createElement('div');
+        container.className = `round-column ${['R1','R2','R3','R4'].includes(round) ? 'small-round' : ''}`;
+        container.id = containerId;
+
+        if (side === 'center') {
+          document.getElementById('centerBracket').appendChild(container);
+        } else {
+          document.getElementById(side === 'left' ? 'leftBracket' : 'rightBracket').appendChild(container);
+        }
+      }
+
+      let matches = [];
+      if (round === 'R1' && data) {
+        for (let i = 0; i < 16; i += 2) {
+          matches.push({ team1: data[i], team2: data[i+1] });
+        }
+      } else if (['R5','R6'].includes(round)) {
+        const existingMatches = container.getElementsByClassName('match');
+        if (existingMatches.length === 0) {
+          matches = data ? data : [{ team1: 'PENDIENTE', team2: 'PENDIENTE' }];
+        }
+      } else {
+        const cantidad = round === 'R2' ? 4 : round === 'R3' ? 2 : 1;
+        for (let i = 0; i < cantidad; i++) {
+          matches.push({ team1: 'PENDIENTE', team2: 'PENDIENTE' });
+        }
+      }
+
+      let h2 = container.querySelector('h2');
+      if (!h2) {
+        h2 = document.createElement('h2');
+        if (round === 'R5') {
+          h2.textContent = '🏆 FINAL';
+          h2.classList.add('header-R5');
+        }
+        else if (round === 'R6') {
+          h2.textContent = '🥉 TERCER PUESTO';
+          h2.classList.add('header-R6');
+        }
+        else if (round === 'R1') {
+          h2.textContent = '16vos';
+          h2.classList.add('header-R1');
+        }
+        else if (round === 'R2') {
+          h2.textContent = 'Octavos de final';
+          h2.classList.add('header-R2');
+        }
+        else if (round === 'R3') {
+          h2.textContent = 'Cuartos de final';
+          h2.classList.add('header-R3');
+        }
+        else if (round === 'R4') {
+          h2.textContent = 'Semifinal';
+          h2.classList.add('header-R4');
+        }
+        container.prepend(h2);
+      }
+
+      matches.forEach((match, idx) => {
+        const existingMatch = container.querySelector(`.match:nth-of-type(${idx + 1})`);
+        if (!existingMatch) {
+          const matchDiv = document.createElement('div');
+          matchDiv.className = 'match';
+          const matchId = `${side}_${round}_${idx}`;
+          matchDiv.dataset.matchId = matchId;
+          matchDiv.style.animationDelay = `${idx * 0.15}s`;
+
+          // Ajustes de posición independientes para cada ronda
+          if (round === 'R1') {
+            // Posiciones para R1
+            if (idx === 0) matchDiv.style.marginTop = '0px';
+            if (idx === 1) matchDiv.style.marginTop = '0px';
+            if (idx === 2) matchDiv.style.marginTop = '0px';
+            if (idx === 3) matchDiv.style.marginTop = '0px';
+            if (idx === 4) matchDiv.style.marginTop = '0px';
+            if (idx === 5) matchDiv.style.marginTop = '0px';
+            if (idx === 6) matchDiv.style.marginTop = '0px';
+            if (idx === 7) matchDiv.style.marginTop = '0px';
+          }
+          else if (round === 'R2') {
+            // Posiciones para R2
+            if (idx === 0) matchDiv.style.marginTop = '-61px';
+            if (idx === 1) matchDiv.style.marginTop = '53px';
+            if (idx === 2) matchDiv.style.marginTop = '47px';
+            if (idx === 3) matchDiv.style.marginTop = '54px';
+          }
+          else if (round === 'R3') {
+            // Posiciones para R3
+            if (idx === 0) matchDiv.style.marginTop = '-154px';
+            if (idx === 1) matchDiv.style.marginTop = '171px';
+          }
+          else if (round === 'R4') {
+            // Posiciones para R4
+            if (idx === 0) matchDiv.style.marginTop = '-350px';
+          }
+          else if (round === 'R5') {
+            // Posiciones para R5 (Final)
+            if (idx === 0) matchDiv.style.marginTop = '245px';
+            matchDiv.style.marginBottom = '50px';
+          }
+          else if (round === 'R6') {
+            // Posiciones para R6 (Tercer puesto)
+            if (idx === 0) matchDiv.style.marginTop = '-200px';
+            matchDiv.style.marginTop = '-320px';
+          }
+
+          ['team1', 'team2'].forEach(teamKey => {
+            const teamDiv = document.createElement('div');
+            teamDiv.className = 'team';
+            teamDiv.dataset.matchId = matchId;
+            teamDiv.dataset.team = teamKey;
+
+            const teamName = match[teamKey] ? match[teamKey] : 'PENDIENTE';
+            teamDiv.innerHTML = `<span class="team-name">${teamName}</span>`;
+
+            const cbContainer = document.createElement('div');
+            cbContainer.className = 'checkboxes';
+            for (let i = 0; i < numCheckboxes; i++) {
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.dataset.index = i;
+
+              cb.addEventListener('change', function() {
+                handleCheckboxChange(teamDiv, i, this.checked, numCheckboxes);
+                // Guardar automáticamente después de cada cambio
+                guardarTorneo();
+              });
+
+              cb.addEventListener('dblclick', function() {
+                if (this.checked) {
+                  this.checked = false;
+                  handleCheckboxChange(teamDiv, i, false, numCheckboxes);
+                  // Guardar automáticamente después de cada cambio
+                  guardarTorneo();
+                }
+              });
+
+              cbContainer.appendChild(cb);
+            }
+            teamDiv.appendChild(cbContainer);
+            matchDiv.appendChild(teamDiv);
+            matchesElements[matchId + '_' + teamKey] = teamDiv;
+          });
+
+          if (match.team1 === 'PENDIENTE' && match.team2 === 'PENDIENTE') {
+            matchDiv.style.opacity = '0';
+            matchDiv.style.pointerEvents = 'none';
+          }
+
+          container.appendChild(matchDiv);
+        }
+      });
+    }
+
+    function handleCheckboxChange(teamDiv, index, isChecked, totalCheckboxes) {
+      const matchId = teamDiv.dataset.matchId;
+      const team = teamDiv.dataset.team;
+      const otroTeam = team === 'team1' ? 'team2' : 'team1';
+      const otroTeamDiv = matchesElements[matchId + '_' + otroTeam];
+
+      if (otroTeamDiv) {
+        const checkboxes = otroTeamDiv.querySelectorAll('input[type="checkbox"]');
+        if (checkboxes[index]) {
+          checkboxes[index].disabled = isChecked;
+        }
+      }
+
+      evaluarCheckbox(teamDiv, totalCheckboxes);
+      actualizarCheckboxes(teamDiv, totalCheckboxes);
+    }
+
+    function actualizarCheckboxes(teamDiv, totalCheckboxes) {
+      const checkboxes = teamDiv.querySelectorAll('input[type="checkbox"]');
+      const marcados = getCheckboxCount(teamDiv);
+      const umbral = ['R5','R6'].includes(teamDiv.dataset.matchId.split('_')[1]) ? tournamentState.config.umbralFinal : tournamentState.config.umbralNormal;
+
+      if (marcados >= umbral) {
+        checkboxes.forEach(cb => {
+          if (!cb.checked) cb.disabled = true;
+        });
+
+        const matchId = teamDiv.dataset.matchId;
+        const otroTeam = teamDiv.dataset.team === 'team1' ? 'team2' : 'team1';
+        const otroTeamDiv = matchesElements[matchId + '_' + otroTeam];
+        if (otroTeamDiv) {
+          const otrosCheckboxes = otroTeamDiv.querySelectorAll('input[type="checkbox"]');
+          otrosCheckboxes.forEach(cb => cb.disabled = true);
+        }
+      } else {
+        checkboxes.forEach((cb, i) => {
+          if (!cb.checked) {
+            const opuestoBloqueado = isCheckboxOpuestoBloqueado(teamDiv, i);
+            cb.disabled = opuestoBloqueado;
+          }
+        });
+      }
+    }
+
+    function isCheckboxOpuestoBloqueado(teamDiv, index) {
+      const matchId = teamDiv.dataset.matchId;
+      const otroTeam = teamDiv.dataset.team === 'team1' ? 'team2' : 'team1';
+      const otroTeamDiv = matchesElements[matchId + '_' + otroTeam];
+      if (otroTeamDiv) {
+        const checkboxes = otroTeamDiv.querySelectorAll('input[type="checkbox"]');
+        return checkboxes[index] && checkboxes[index].checked;
+      }
+      return false;
+    }
+
+    function getCheckboxCount(teamDiv) {
+      const checkboxes = teamDiv.querySelectorAll('input[type="checkbox"]');
+      let count = 0;
+      checkboxes.forEach(cb => { if(cb.checked) count++; });
+      return count;
+    }
+
+    function evaluarCheckbox(teamDiv, totalCheckboxes) {
+      const matchIdParts = teamDiv.dataset.matchId.split('_');
+      const rondaActual = matchIdParts[1];
+      const umbral = ['R5','R6'].includes(rondaActual) ? tournamentState.config.umbralFinal : tournamentState.config.umbralNormal;
+
+      const matchId = teamDiv.dataset.matchId;
+      const team1Div = matchesElements[matchId + '_team1'];
+      const team2Div = matchesElements[matchId + '_team2'];
+      const count1 = getCheckboxCount(team1Div);
+      const count2 = getCheckboxCount(team2Div);
+
+      if (rondaActual === 'R4') {
+        if (count1 >= umbral || count2 >= umbral) {
+          const [side] = team1Div.dataset.matchId.split('_');
+
+          if (count1 >= umbral && count2 < umbral) {
+            team1Div.classList.add('winner');
+            team1Div.classList.remove('loser');
+            team2Div.classList.add('loser');
+            team2Div.classList.remove('winner');
+
+            // Left R4 winner goes to top in R5, loser goes to top in R6
+            if (side === 'left') {
+              actualizarDestino('center_R5_0', 'team1', team1Div);
+              actualizarDestino('center_R6_0', 'team1', team2Div);
+            }
+            // Right R4 winner goes to top in R5, loser goes to bottom in R6
+            else {
+              actualizarDestino('center_R5_0', 'team2', team1Div);
+              actualizarDestino('center_R6_0', 'team2', team2Div);
+            }
+          }
+          else if (count2 >= umbral && count1 < umbral) {
+            team2Div.classList.add('winner');
+            team2Div.classList.remove('loser');
+            team1Div.classList.add('loser');
+            team1Div.classList.remove('winner');
+
+            // Left R4 winner goes to top in R5, loser goes to top in R6
+            if (side === 'left') {
+              actualizarDestino('center_R5_0', 'team1', team2Div);
+              actualizarDestino('center_R6_0', 'team1', team1Div);
+            }
+            // Right R4 winner goes to top in R5, loser goes to bottom in R6
+            else {
+              actualizarDestino('center_R5_0', 'team2', team2Div);
+              actualizarDestino('center_R6_0', 'team2', team1Div);
+            }
+          }
+
+          // Guardar después de actualizar ganadores
+          guardarTorneo();
+        }
+      }
+      else if (count1 >= umbral || count2 >= umbral) {
+        if (count1 > count2) {
+          team1Div.classList.add('winner');
+          team1Div.classList.remove('loser');
+          team2Div.classList.add('loser');
+          team2Div.classList.remove('winner');
+        } else if (count2 > count1) {
+          team2Div.classList.add('winner');
+          team2Div.classList.remove('loser');
+          team1Div.classList.add('loser');
+          team1Div.classList.remove('winner');
+        }
+
+        if (!['R5','R6'].includes(rondaActual)) {
+          propagarGanador(count1 > count2 ? team1Div : team2Div);
+        }
+
+        // Guardar después de actualizar ganadores
+        guardarTorneo();
+      } else {
+        team1Div.classList.remove('winner', 'loser');
+        team2Div.classList.remove('winner', 'loser');
+      }
+    }
+
+    function propagarGanador(teamDiv) {
+      const matchId = teamDiv.dataset.matchId;
+      const [side, rondaActual, idx] = matchId.split('_');
+      const numRonda = parseInt(rondaActual.substring(1));
+
+      if (numRonda < 4) {
+        const siguienteRonda = 'R' + (numRonda + 1);
+        const nextIdx = Math.floor(idx / 2);
+        const destinoId = `${side}_${siguienteRonda}_${nextIdx}`;
+        const destinoTeam = (idx % 2 === 0) ? 'team1' : 'team2';
+        actualizarDestino(destinoId, destinoTeam, teamDiv);
+      }
+    }
+
+    function actualizarDestino(destinoId, destinoTeam, teamDiv) {
+      let destinoDiv = matchesElements[destinoId + '_' + destinoTeam];
+      if (!destinoDiv) {
+        const [side, round] = destinoId.split('_');
+        const numCheckboxes = ['R5','R6'].includes(round) ? 5 : 3;
+        renderRound(side, round, null, numCheckboxes);
+        destinoDiv = matchesElements[destinoId + '_' + destinoTeam];
+      }
+      if (destinoDiv) {
+        const nombreGanador = teamDiv.querySelector('.team-name').textContent;
+        destinoDiv.querySelector('.team-name').textContent = nombreGanador;
+
+        destinoDiv.classList.remove('winner', 'loser');
+
+        const parentMatch = destinoDiv.closest('.match');
+        parentMatch.style.opacity = '1';
+        parentMatch.style.pointerEvents = 'auto';
+
+        // Guardar después de actualizar destino
+        guardarTorneo();
+      }
+    }
+  </script>
+</body>
+</html>
