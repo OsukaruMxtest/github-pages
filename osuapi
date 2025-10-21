@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay de Barras de Salud - Individual</title>
+    <style>
+        :root {
+            --accent-1: #04f88c;
+            --accent-2: #bc5efb;
+            --accent-3: #2c2fd8;
+            --bg: #040444;
+            --muted: #8484a4;
+            --lav: #e2d7ef;
+            --radius: 12px;
+            --primary-color: var(--accent-2);
+            --secondary-color: var(--accent-1);
+            --danger-color: var(--accent-3);
+            --background-color: rgba(4, 4, 68, 0.7);
+            --text-color: var(--lav);
+            --header-bg-color: rgba(4, 4, 68, 0.7);
+            --header-text-color: var(--lav);
+            --border-color: rgba(226, 215, 239, 0.2);
+            --shadow-color: rgba(4, 4, 68, 0.5);
+            --font-family: 'Roboto', Arial, sans-serif;
+            --table-max-width: 450px;
+            --table-max-height: 700px;
+            --table-font-size: 16px;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 1920px;
+            height: 1080px;
+            font-family: var(--font-family);
+            background-color: transparent;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .overlay-content {
+            position: absolute;
+            top: 600px;
+            right: 0px;
+            transform: translateY(-50%);
+            width: var(--table-max-width);
+            max-height: var(--table-max-height);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: transparent;
+        }
+        .overlay-content::before,
+        .overlay-content::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 10px;
+            z-index: -1;
+        }
+        .overlay-content::before {
+            background-image: url('  https://i.imgur.com/trerUfz.png  ');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            z-index: -2;
+        }
+        .overlay-content::after {
+            background-color: rgba(4, 4, 68, 0.5);
+        }
+        .table-container {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: var(--background-color);
+            box-shadow: 0 2px 8px var(--shadow-color);
+            font-size: var(--table-font-size);
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            font-weight: bold;
+        }
+        col.pos { width: 32px; }
+        col.logo { width: 40px; }
+        col.jugador { width: auto; }
+        col.elim { width: 42px; }
+        col.pp { width: 34px; }
+        col.total { width: 52px; }
+        col.health { width: 60px; }
+        th, td {
+            padding: 4px 2px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: clip;
+            font-size: var(--table-font-size);
+        }
+        th:nth-child(4), td:nth-child(4) {
+            width: 42px;
+            min-width: 42px;
+            padding: 4px 4px;
+        }
+        td:nth-child(3), th:nth-child(3) {
+            text-align: left;
+            padding-left: 6px;
+            white-space: nowrap;
+            min-width: 0;
+            width: 100%;
+        }
+        th {
+            background-color: var(--header-bg-color);
+            color: var(--header-text-color);
+            font-weight: 700;
+        }
+        tr:nth-child(odd) {
+            background-color: rgba(30, 30, 30, 0.35);
+        }
+        tr:nth-child(even) {
+            background-color: rgba(50, 50, 50, 0.75);
+        }
+        tr.eliminado {
+            opacity: 0.4;
+            color: #aaa;
+        }
+        .fade-element {
+            opacity: 1;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .fade-element.fading {
+            opacity: 0;
+        }
+        .logo-img {
+            height: 30px;
+            width: auto;
+            border-radius: 2px;
+            vertical-align: middle;
+        }
+        .health-bar-container {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            min-height: 24px;
+        }
+        .health-bar {
+            width: 8px;
+            height: 30px;
+            background-color: #818181;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .health-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+        .health-bar.outside-blue::before {
+            animation: borderBlink 1.2s infinite;
+        }
+        @keyframes borderBlink {
+            0%, 100% { border-color: transparent; }
+            50% { border-color: #007bff; }
+        }
+        .health-bar.danger .health-fill {
+            background-color: red !important;
+        }
+        .health-bar.eliminated .health-fill,
+        .health-bar.disconnected .health-fill {
+            background-color: black;
+        }
+        .health-fill {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            z-index: 1;
+            transition: height 0.3s;
+        }
+        .nomenclatura-centrada {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-size: var(--table-font-size);
+            font-weight: bold;
+            background-color: var(--header-bg-color);
+            color: var(--header-text-color);
+            padding: 4px 10px;
+            border-radius: 5px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        .nomenclatura-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .color-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+        .color-vivo { background-color: rgb(33, 255, 2); }
+        .color-derribado { background-color: red; }
+        .color-eliminado { background-color: #818181; }
+        .color-fuera-zona {
+            background-color: #007bff;
+            animation: borderBlink 1.2s infinite;
+        }
+        #finalPlayersContainer {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .final-player-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            background-color: var(--background-color);
+            border-radius: 8px;
+            min-width: 110px;
+            text-align: center;
+            font-size: 13px;
+            height: 120px;
+            justify-content: center;
+        }
+        .final-player-logo {
+            height: 30px;
+            width: auto;
+            border-radius: 3px;
+        }
+        .final-player-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0;
+        }
+        .final-health-bar-container {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            min-height: 30px;
+        }
+        .final-health-bar {
+            width: 8px;
+            height: 30px;
+            background-color: #818181;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .final-health-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+        .final-health-bar.outside-blue::before {
+            animation: borderBlink 1.2s infinite;
+        }
+        .final-health-bar.danger .final-health-fill {
+            background-color: red !important;
+        }
+        .final-health-bar.eliminated .final-health-fill,
+        .final-health-bar.disconnected .final-health-fill {
+            background-color: black;
+        }
+        .final-health-fill {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            z-index: 1;
+            transition: height 0.3s;
+        }
+        #debugControls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .debug-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .debug-btn:hover {
+            background: rgba(50, 50, 50, 0.8);
+        }
+        .config-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 3000;
+            color: white;
+            font-size: 12px;
+            max-width: 300px;
+            display: none;
+        }
+        .config-panel h3 {
+            margin-bottom: 10px;
+            color: var(--accent-1);
+        }
+        .config-group {
+            margin-bottom: 10px;
+        }
+        .config-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        .config-input {
+            width: 100%;
+            padding: 4px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 3px;
+            color: white;
+        }
+        .config-btn {
+            background: var(--accent-2);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="debugControls" style="display:none;">
+        <button class="debug-btn" onclick="simulateNormal()">Modo Normal (10 jugadores)</button>
+        <button class="debug-btn" onclick="simulate5Players()">5 Jugadores</button>
+        <button class="debug-btn" onclick="simulate2Players()">2 Jugadores</button>
+        <button class="debug-btn" onclick="toggleConfigPanel()">Configuración</button>
+    </div>
+    <div id="configPanel" class="config-panel">
+        <h3>Configuración</h3>
+        <button class="config-btn" onclick="resetConfig()">Restablecer</button>
+        <button class="config-btn" onclick="toggleConfigPanel()">Cerrar</button>
+    </div>
+    <div class="overlay-content" id="mainOverlay">
+        <div class="table-container">
+            <table id="teamTable">
+                <colgroup>
+                    <col class="pos">
+                    <col class="logo">
+                    <col class="jugador">
+                    <col class="elim">
+                    <col class="pp">
+                    <col class="total">
+                    <col class="health">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>POS</th>
+                        <th></th>
+                        <th>JUGADOR</th>
+                        <th>ELIM</th>
+                        <th>PP</th>
+                        <th>TOTAL</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="nomenclatura-centrada">
+            <div class="nomenclatura-item">
+                <div class="color-indicator color-vivo"></div>
+                <span>Vivo</span>
+            </div>
+            <div class="nomenclatura-item">
+                <div class="color-indicator color-derribado"></div>
+                <span>Derribado</span>
+            </div>
+            <div class="nomenclatura-item">
+                <div class="color-indicator color-eliminado"></div>
+                <span>Eliminado</span>
+            </div>
+            <div class="nomenclatura-item">
+                <div class="color-indicator color-fuera-zona"></div>
+                <span>Fuera de zona</span>
+            </div>
+        </div>
+    </div>
+    <div id="finalPlayersContainer"></div>
+    <script>
+        const DEBUG_MODE = true;
+        let rankToPPP = JSON.parse(localStorage.getItem('rankToPPP')) || {
+            1: 16, 2: 14, 3: 12, 4: 10, 5: 10, 6: 8, 7: 8, 8: 6, 9: 6, 10: 6,
+            11: 4, 12: 4, 13: 4, 14: 2, 15: 2, 16: 2, 17: 2
+        };
+        let currentSimulation = null;
+        let lastPlayerStats = [];
+
+        function getMockData() {
+            return {
+                allinfo: {
+                    gameId: "mock_game_001",
+                    TotalPlayerList: [
+                        { uId: 1, playerName: "Jugador01", teamId: 1, rank: 1, killNum: 8, damage: 1200, health: 100, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 2, playerName: "Jugador02", teamId: 2, rank: 2, killNum: 7, damage: 1100, health: 90, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 3, playerName: "Jugador03", teamId: 3, rank: 3, killNum: 6, damage: 1000, health: 80, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 4, playerName: "Jugador04", teamId: 4, rank: 4, killNum: 5, damage: 900, health: 70, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 5, playerName: "Jugador05", teamId: 5, rank: 5, killNum: 4, damage: 800, health: 60, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 6, playerName: "Jugador06", teamId: 6, rank: 6, killNum: 3, damage: 700, health: 50, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 7, playerName: "Jugador07", teamId: 7, rank: 7, killNum: 2, damage: 600, health: 40, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 8, playerName: "Jugador08", teamId: 8, rank: 8, killNum: 1, damage: 500, health: 30, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 9, playerName: "Jugador09", teamId: 9, rank: 9, killNum: 0, damage: 400, health: 20, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
+                        { uId: 10, playerName: "Jugador10", teamId: 10, rank: 10, killNum: 0, damage: 300, health: 10, healthMax: 100, liveState: 1, isOutsideBlueCircle: false }
+                    ]
+                }
+            };
+        }
+
+        function loadConfig() {
+        }
+
+        function applyConfig() {
+        }
+
+        function resetConfig() {
+            localStorage.removeItem('rankToPPP');
+            location.reload();
+        }
+
+        function toggleConfigPanel() {
+            const panel = document.getElementById('configPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function fetchData() {
+            try {
+                let data;
+                if (currentSimulation === 'normal') {
+                    data = getMockData();
+                } else if (currentSimulation === '5players') {
+                    const mock = getMockData();
+                    data = { allinfo: { gameId: mock.allinfo.gameId, TotalPlayerList: mock.allinfo.TotalPlayerList.slice(0, 5) } };
+                } else if (currentSimulation === '2players') {
+                    const mock = getMockData();
+                    data = { allinfo: { gameId: mock.allinfo.gameId, TotalPlayerList: mock.allinfo.TotalPlayerList.slice(0, 2) } };
+                } else {
+                    const response = await fetch('http://localhost:10086/getallinfo');
+                    if (!response.ok) throw new Error('Error al obtener los datos');
+                    data = await response.json();
+                }
+                const players = data.allinfo?.TotalPlayerList || [];
+                const realPlayers = players.filter(p => p.playerName && p.playerName.trim() !== '');
+                lastPlayerStats = realPlayers.map(p => ({
+                    ...p,
+                    playerId: p.uId,
+                    health: p.health || 100,
+                    healthMax: p.healthMax || 100,
+                    liveState: p.liveState === 0 ? 1 : p.liveState,
+                    isOutsideBlueCircle: p.isOutsideBlueCircle || false,
+                    killNum: p.killNum || 0,
+                    damage: p.damage || 0,
+                    rank: p.rank || 999
+                }));
+
+                let displayItems = lastPlayerStats.map(p => {
+                    const ppp = rankToPPP[p.rank] || 0;
+                    const total = ppp + (p.killNum || 0);
+                    return { ...p, ppp, total };
+                });
+                displayItems.sort((a, b) => {
+                    if (b.total !== a.total) return b.total - a.total;
+                    if (b.ppp !== a.ppp) return b.ppp - a.ppp;
+                    return b.killNum - a.killNum;
+                });
+
+                const aliveItems = displayItems.filter(p => p.liveState !== 5);
+                const mainOverlay = document.getElementById('mainOverlay');
+                const finalContainer = document.getElementById('finalPlayersContainer');
+
+                if (aliveItems.length <= 5 && aliveItems.length > 2) {
+                    mainOverlay.style.display = 'none';
+                    finalContainer.style.display = 'flex';
+                    finalContainer.innerHTML = '';
+                    aliveItems.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'final-player-card';
+                        const paddedTeamId = item.teamId.toString().padStart(3, '0');
+                        const logo = document.createElement('img');
+                        logo.className = 'final-player-logo';
+                        logo.src = `logo/${paddedTeamId}.png`;
+                        logo.onerror = () => { logo.src = `logo/default.jpeg`; };
+                        const name = document.createElement('div');
+                        name.className = 'final-player-name';
+                        name.textContent = item.playerName || 'Desconocido';
+                        const healthContainer = document.createElement('div');
+                        healthContainer.className = 'final-health-bar-container';
+                        updateFinalHealthBar(healthContainer, item);
+                        card.appendChild(logo);
+                        card.appendChild(name);
+                        card.appendChild(healthContainer);
+                        finalContainer.appendChild(card);
+                    });
+                } else if (aliveItems.length <= 2) {
+                    mainOverlay.style.display = 'none';
+                    finalContainer.style.display = 'none';
+                } else {
+                    mainOverlay.style.display = 'flex';
+                    finalContainer.style.display = 'none';
+                    const tableBody = document.querySelector('#teamTable tbody');
+                    const topItems = displayItems.slice(0, 16);
+                    const orderedIds = topItems.map(item => item.playerId);
+                    topItems.forEach((item, index) => {
+                        const id = item.playerId;
+                        let row = tableBody.querySelector(`tr[data-player-id="${id}"]`);
+                        if (!row) {
+                            row = document.createElement('tr');
+                            row.dataset.playerId = id;
+                            row.innerHTML = `
+                                <td></td>
+                                <td><img alt="Logo" class="logo-img"></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><div class="health-bar-container"></div></td>`;
+                            tableBody.appendChild(row);
+                        }
+                        row.cells[0].textContent = index + 1;
+                        row.cells[3].textContent = item.killNum || 0;
+                        row.cells[4].textContent = item.ppp || 0;
+                        row.cells[5].textContent = item.total || 0;
+                        const nameCell = row.cells[2];
+                        const img = row.cells[1].querySelector('img');
+                        nameCell.textContent = item.playerName || 'Desconocido';
+                        const paddedTeamId = item.teamId.toString().padStart(3, '0');
+                        img.src = `logo/${paddedTeamId}.png`;
+                        img.onerror = () => { img.src = `logo/default.jpeg`; };
+                        row.classList.toggle('eliminado', item.liveState === 5);
+                        const healthContainer = row.cells[6].querySelector('.health-bar-container');
+                        updateHealthBars(healthContainer, [item]);
+                    });
+                    tableBody.querySelectorAll('tr').forEach(row => {
+                        const id = row.dataset.playerId;
+                        if (id && !orderedIds.includes(parseInt(id))) {
+                            row.remove();
+                        }
+                    });
+                    animateReorder(tableBody, orderedIds);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function updateHealthBars(container, playerArray) {
+            const calcColor = perc => {
+                if (perc <= 20) return 'rgb(255,131,0)';
+                const r = Math.round(33 + (255 - 33) * ((100 - perc) / 80));
+                const g = Math.round(255 + (131 - 255) * ((100 - perc) / 80));
+                const b = Math.round(2 + (0 - 2) * ((100 - perc) / 80));
+                return `rgb(${r},${g},${b})`;
+            };
+            container.innerHTML = '';
+            playerArray.forEach(player => {
+                const bar = document.createElement('div');
+                bar.className = 'health-bar';
+                const perc = (player.health / player.healthMax) * 100;
+                const cls = player.liveState === 5 ? 'eliminated' :
+                            player.liveState === 6 ? 'disconnected' :
+                            player.liveState === 4 ? 'danger' : '';
+                const borderCls = player.isOutsideBlueCircle && player.liveState !== 5 ? 'outside-blue' : '';
+                if (cls) bar.classList.add(cls);
+                if (borderCls) bar.classList.add(borderCls);
+                const fill = document.createElement('div');
+                fill.className = 'health-fill';
+                fill.style.height = player.liveState === 5 ? '0%' : `${perc}%`;
+                fill.style.backgroundColor = player.liveState === 5 ? 'black' : calcColor(perc);
+                bar.appendChild(fill);
+                container.appendChild(bar);
+            });
+        }
+
+        function updateFinalHealthBar(container, player) {
+            const calcColor = perc => {
+                if (perc <= 20) return 'rgb(255,131,0)';
+                const r = Math.round(33 + (255 - 33) * ((100 - perc) / 80));
+                const g = Math.round(255 + (131 - 255) * ((100 - perc) / 80));
+                const b = Math.round(2 + (0 - 2) * ((100 - perc) / 80));
+                return `rgb(${r},${g},${b})`;
+            };
+            const bar = document.createElement('div');
+            bar.className = 'final-health-bar';
+            const perc = (player.health / player.healthMax) * 100;
+            const cls = player.liveState === 5 ? 'eliminated' :
+                        player.liveState === 6 ? 'disconnected' :
+                        player.liveState === 4 ? 'danger' : '';
+            const borderCls = player.isOutsideBlueCircle && player.liveState !== 5 ? 'outside-blue' : '';
+            if (cls) bar.classList.add(cls);
+            if (borderCls) bar.classList.add(borderCls);
+            const fill = document.createElement('div');
+            fill.className = 'final-health-fill';
+            fill.style.height = player.liveState === 5 ? '0%' : `${perc}%`;
+            fill.style.backgroundColor = player.liveState === 5 ? 'black' : calcColor(perc);
+            bar.appendChild(fill);
+            container.appendChild(bar);
+        }
+
+        function animateReorder(tableBody, orderedIds) {
+            const rows = Array.from(tableBody.children);
+            const firstPositions = new Map();
+            rows.forEach(row => {
+                if (row.dataset.playerId) {
+                    firstPositions.set(row.dataset.playerId, row.getBoundingClientRect().top);
+                }
+            });
+            orderedIds.forEach(id => {
+                const row = tableBody.querySelector(`tr[data-player-id="${id}"]`);
+                if (row) tableBody.appendChild(row);
+            });
+            requestAnimationFrame(() => {
+                rows.forEach(row => {
+                    if (row.dataset.playerId) {
+                        const lastTop = row.getBoundingClientRect().top;
+                        const firstTop = firstPositions.get(row.dataset.playerId);
+                        if (firstTop !== undefined) {
+                            const deltaY = firstTop - lastTop;
+                            row.style.transform = `translateY(${deltaY}px)`;
+                            row.style.transition = 'none';
+                        }
+                    }
+                });
+                requestAnimationFrame(() => {
+                    rows.forEach(row => {
+                        if (row.dataset.playerId) {
+                            row.style.transition = 'transform 0.6s ease';
+                            row.style.transform = 'translateY(0)';
+                        }
+                    });
+                });
+            });
+        }
+
+        function simulateNormal() { currentSimulation = 'normal'; fetchData(); }
+        function simulate5Players() { currentSimulation = '5players'; fetchData(); }
+        function simulate2Players() { currentSimulation = '2players'; fetchData(); }
+
+        window.addEventListener('load', () => {
+            if (DEBUG_MODE) {
+                document.getElementById('debugControls').style.display = 'flex';
+            }
+            loadConfig();
+            fetchData();
+            if (!DEBUG_MODE) {
+                setInterval(fetchData, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
