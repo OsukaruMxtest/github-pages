@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabla SRD</title>
+    <title>Overlay de Barras de Salud - Equipos</title>
     <style>
         :root {
             --accent-1: #04f88c;
@@ -22,12 +22,17 @@
             --header-text-color: var(--lav);
             --border-color: rgba(226, 215, 239, 0.2);
             --shadow-color: rgba(4, 4, 68, 0.5);
-            --font-family: 'Roboto', Arial, sans-serif;
-            --table-max-width: 450px;
-            --table-max-height: 700px;
-            --table-font-size: 16px;
+            --font-family: 'Agency FB', 'Roboto', Arial, sans-serif;
+            --table-max-width: 300px;
+            --table-max-height: 800px;
+            --table-font-size: 12px;
+            --final-logo-size: 45px;
+            --final-card-height: 130px;
+            --final-team-name-font-size: 12px;
+            --final-team-name-top: 111px;
         }
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Agency+FB:wght@400;700&display=swap');
         * {
             box-sizing: border-box;
             margin: 0;
@@ -57,147 +62,188 @@
             gap: 8px;
             padding: 10px;
             background: transparent;
-        }
-        .overlay-content::before,
-        .overlay-content::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 10px;
-            z-index: -1;
-        }
-        .overlay-content::before {
-            background-image: url('  https://i.imgur.com/trerUfz.png  ');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.3;
-            z-index: -2;
-        }
-        .overlay-content::after {
-            background-color: rgba(4, 4, 68, 0.5);
+            transition: opacity 0.4s ease-in-out;
         }
         .table-container {
             width: 100%;
             max-width: 100%;
             border-radius: 6px;
             overflow: hidden;
-            background-color: var(--background-color);
-            box-shadow: 0 2px 8px var(--shadow-color);
+            background-color: transparent;
+            box-shadow: none;
             font-size: var(--table-font-size);
         }
         table {
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0 2px;
             width: 100%;
             table-layout: fixed;
             font-weight: bold;
         }
-        col.pos { width: 32px; }
-        col.logo { width: 40px; }
-        col.jugador { width: auto; }
-        col.elim { width: 42px; }
-        col.pp { width: 34px; }
-        col.total { width: 52px; }
-        col.health { width: 60px; }
+        col.pos { width: 6%; }
+        col.logo { width: 10%; }
+        col.jugador { width: 40%; }
+        col.elim { width: 10%; }
+        col.pp { width: 10%; }
+        col.total { width: 14%; }
+        col.health { width: 10%; }
         th, td {
-            padding: 4px 2px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 0;
+            border: none;
             text-align: center;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: clip;
             font-size: var(--table-font-size);
-        }
-        th:nth-child(4), td:nth-child(4) {
-            width: 42px;
-            min-width: 42px;
-            padding: 4px 4px;
+            position: relative;
         }
         td:nth-child(3), th:nth-child(3) {
             text-align: left;
-            padding-left: 6px;
+            padding-left: 0;
             white-space: nowrap;
             min-width: 0;
-            width: 100%;
+            width: 40%;
         }
-        th {
-            background-color: var(--header-bg-color);
-            color: var(--header-text-color);
-            font-weight: 700;
+        thead {
+            height: 130px;
+            background-image: url('https://i.imgur.com/SeE8GC4.png');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        thead tr {
+            display: table-row;
+        }
+        thead th {
+            background: transparent;
+            color: #f2a900;
+            font-weight: bold;
+            font-size: 18px;
+            line-height: 130px;
+            vertical-align: middle;
+        }
+        .header-text {
+            font-size: 18px !important;
+            transform: translate(2px, 45px);
         }
         tr:nth-child(odd) {
-            background-color: rgba(30, 30, 30, 0.35);
+            background-color: transparent;
         }
         tr:nth-child(even) {
-            background-color: rgba(50, 50, 50, 0.75);
+            background-color: transparent;
         }
         tr.eliminado {
             opacity: 0.4;
             color: #aaa;
         }
-        .fade-element {
+
+        /* === Transiciones suaves para filas === */
+        tr {
+            transition: all 0.6s ease;
             opacity: 1;
-            transition: opacity 0.4s ease-in-out;
+            transform: scale(1);
         }
-        .fade-element.fading {
-            opacity: 0;
+        .hidden-card {
+            opacity: 0 !important;
+            transform: scale(0.8) !important;
+        }
+
+        .pos-container {
+            background-image: url('https://i.imgur.com/lYrQOJN.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f2a900;
+            font-weight: bold;
+            font-size: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .logo-container {
+            background-image: url('https://i.imgur.com/OmDJYx6.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2px;
         }
         .logo-img {
-            height: 30px;
+            height: 20px;
             width: auto;
             border-radius: 2px;
             vertical-align: middle;
-        }
-        .health-bar-container {
-            display: flex;
-            gap: 2px;
-            justify-content: center;
-            min-height: 24px;
-        }
-        .health-bar {
-            width: 8px;
-            height: 30px;
-            background-color: #818181;
-            border-radius: 2px;
-            overflow: hidden;
             position: relative;
-        }
-        .health-bar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 1px solid transparent;
-            border-radius: 2px;
-            box-sizing: border-box;
             z-index: 2;
+            margin: 2px;
         }
-        .health-bar.outside-blue::before {
-            animation: borderBlink 1.2s infinite;
-        }
-        @keyframes borderBlink {
-            0%, 100% { border-color: transparent; }
-            50% { border-color: #007bff; }
-        }
-        .health-bar.danger .health-fill {
-            background-color: red !important;
-        }
-        .health-bar.eliminated .health-fill,
-        .health-bar.disconnected .health-fill {
-            background-color: black;
-        }
-        .health-fill {
+        .jugador-container {
+            background-image: url('https://i.imgur.com/UJuRsIR.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
             width: 100%;
-            height: 100%;
-            position: absolute;
-            bottom: 0;
-            z-index: 1;
-            transition: height 0.3s;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            color: black;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .elim-container,
+        .pp-container,
+        .health-container {
+            background-image: url('https://i.imgur.com/OmDJYx6.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            padding: 2px;
+        }
+        .elim-container > *,
+        .pp-container > *,
+        .health-container > * {
+            margin: 2px;
+        }
+        .total-container {
+            background-image: url('https://i.imgur.com/cbY5Gno.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            padding: 2px;
+        }
+        .total-container > * {
+            margin: 2px;
         }
         .nomenclatura-centrada {
             display: flex;
@@ -206,17 +252,32 @@
             gap: 12px;
             font-size: var(--table-font-size);
             font-weight: bold;
-            background-color: var(--header-bg-color);
-            color: var(--header-text-color);
+            background-image: url('https://i.imgur.com/l5uEXTt.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            color: black;
             padding: 4px 10px;
             border-radius: 5px;
             width: 100%;
             flex-wrap: wrap;
+            height: 30px;
+            position: relative;
+        }
+        .nomenclatura-centrada::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
         }
         .nomenclatura-item {
             display: flex;
             align-items: center;
             gap: 4px;
+            position: relative;
+            z-index: 2;
         }
         .color-indicator {
             width: 10px;
@@ -240,42 +301,65 @@
             display: flex;
             gap: 16px;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             flex-wrap: wrap;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
         }
+
+        /* === Animación para tarjetas finales === */
         .final-player-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            padding: 10px;
-            background-color: var(--background-color);
-            border-radius: 8px;
-            min-width: 110px;
+            padding: 12px 8px;
+            background-color: transparent;
+            border-radius: 10px;
+            min-width: 130px;
             text-align: center;
-            font-size: 13px;
-            height: 120px;
-            justify-content: center;
+            height: var(--final-card-height);
+            position: relative;
+            justify-content: flex-start;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.6s ease forwards;
+            transition: all 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .final-player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 10px;
+            background-image: url('https://i.imgur.com/vo3DbPh.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: -1;
         }
         .final-player-logo {
-            height: 30px;
+            height: var(--final-logo-size);
             width: auto;
-            border-radius: 3px;
-        }
-        .final-player-name {
-            font-weight: bold;
-            font-size: 16px;
-            margin: 0;
+            border-radius: 4px;
+            margin-top: 8px;
         }
         .final-health-bar-container {
             display: flex;
             gap: 2px;
             justify-content: center;
-            min-height: 30px;
+            min-height: 50px;
+            margin-top: 8px;
         }
         .final-health-bar {
             width: 8px;
-            height: 30px;
+            height: 26px;
             background-color: #818181;
             border-radius: 2px;
             overflow: hidden;
@@ -296,9 +380,6 @@
         .final-health-bar.outside-blue::before {
             animation: borderBlink 1.2s infinite;
         }
-        .final-health-bar.danger .final-health-fill {
-            background-color: red !important;
-        }
         .final-health-bar.eliminated .final-health-fill,
         .final-health-bar.disconnected .final-health-fill {
             background-color: black;
@@ -310,6 +391,18 @@
             bottom: 0;
             z-index: 1;
             transition: height 0.3s;
+        }
+        .final-player-name {
+            position: absolute;
+            top: var(--final-team-name-top);
+            left: 0;
+            right: 0;
+            font-weight: bold;
+            font-size: var(--final-team-name-font-size);
+            margin: 0;
+            color: black;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+            text-align: center;
         }
         #debugControls {
             position: absolute;
@@ -375,13 +468,50 @@
             cursor: pointer;
             margin-top: 5px;
         }
+
+        /* === Nuevos estilos para barras de salud en tabla === */
+        .health-bar-container {
+            position: relative;
+            width: 4px;
+            height: 18px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+            margin: 0 1px;
+            overflow: hidden;
+        }
+
+        .health-bar-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: height 0.3s ease;
+            border-radius: 2px;
+        }
+
+        @keyframes borderBlink {
+            0%, 100% {
+                box-shadow: 0 0 4px 2px rgba(0, 123, 255, 0.9);
+                filter: brightness(1.3);
+            }
+            50% {
+                box-shadow: 0 0 2px 1px rgba(0, 123, 255, 0.2);
+                filter: brightness(0.6);
+            }
+        }
+
+        @keyframes redPulse {
+            0%, 100% { background-color: #ff3333; }
+            50%      { background-color: #cc0000; }
+        }
     </style>
 </head>
 <body>
     <div id="debugControls" style="display:none;">
-        <button class="debug-btn" onclick="simulateNormal()">Modo Normal (10 jugadores)</button>
-        <button class="debug-btn" onclick="simulate5Players()">5 Jugadores</button>
-        <button class="debug-btn" onclick="simulate2Players()">2 Jugadores</button>
+        <button class="debug-btn" onclick="simulateNormal()">Modo Normal (16 equipos)</button>
+        <button class="debug-btn" onclick="simulate5Players()">5 Equipos</button>
+        <button class="debug-btn" onclick="simulate2Players()">2 Equipos</button>
         <button class="debug-btn" onclick="toggleConfigPanel()">Configuración</button>
     </div>
     <div id="configPanel" class="config-panel">
@@ -403,13 +533,13 @@
                 </colgroup>
                 <thead>
                     <tr>
-                        <th>POS</th>
-                        <th></th>
-                        <th>JUGADOR</th>
-                        <th>ELIM</th>
-                        <th>PP</th>
-                        <th>TOTAL</th>
-                        <th></th>
+                        <th class="header-text">#</th>
+                        <th class="header-text"> </th>
+                        <th class="header-text">EQUIPO</th>
+                        <th class="header-text">PE</th>
+                        <th class="header-text">PP</th>
+                        <th class="header-text">TOTAL</th>
+                        <th class="header-text"> </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -439,43 +569,98 @@
     <script>
         const DEBUG_MODE = false;
         let rankToPPP = JSON.parse(localStorage.getItem('rankToPPP')) || {
-            1: 16, 2: 14, 3: 12, 4: 10, 5: 10, 6: 8, 7: 8, 8: 6, 9: 6, 10: 6,
-            11: 4, 12: 4, 13: 4, 14: 2, 15: 2, 16: 2, 17: 2
+            1: 10, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 2, 8: 1
         };
         let currentSimulation = null;
         let lastPlayerStats = [];
+        // === CORRECCIÓN: Variables para controlar el estado de la vista ===
+        let currentViewMode = 'table'; // 'table', 'final', o 'hidden'
+        let isTransitioning = false;
+
+        function getHealthColor(percentage) {
+            if (percentage >= 55) {
+                const ratio = (percentage - 55) / 45;
+                const r = Math.round(0 + 0x80 * ratio);
+                return `rgb(${r}, 255, 0)`;
+            } else if (percentage >= 35) {
+                const ratio = (percentage - 35) / 20;
+                const r = Math.round(0x80 + (0xFF - 0x80) * ratio);
+                return `rgb(${r}, 255, 0)`;
+            } else if (percentage >= 1) {
+                const ratio = (percentage - 1) / 34;
+                const g = Math.round(255 - (255 - 0x80) * ratio);
+                return `rgb(255, ${g}, 0)`;
+            } else {
+                return 'rgb(255, 128, 0)';
+            }
+        }
 
         function getMockData() {
+            const teamCount = currentSimulation === 'normal' ? 16 : 
+                             currentSimulation === '5players' ? 5 : 
+                             currentSimulation === '2players' ? 2 : 16;
+
+            const players = [];
+            for (let teamId = 1; teamId <= teamCount; teamId++) {
+                const teamName = `EQUIPO ${teamId}`;
+                const playerCount = Math.floor(Math.random() * 4) + 1;
+                const baseRank = teamId;
+                const baseKills = Math.max(0, 8 - teamId);
+
+                for (let p = 0; p < playerCount; p++) {
+                    const rand = Math.random();
+                    let liveState, health;
+
+                    if (rand < 0.15) {
+                        liveState = 5; // eliminado
+                        health = 0;
+                    } else if (rand < 0.30) {
+                        liveState = 4; // derribado
+                        health = Math.floor(Math.random() * 30) + 1;
+                    } else {
+                        liveState = 1; // vivo
+                        const healthRand = Math.random();
+                        if (healthRand < 0.3) {
+                            health = 100;
+                        } else if (healthRand < 0.6) {
+                            health = 70 + Math.floor(Math.random() * 30);
+                        } else if (healthRand < 0.85) {
+                            health = 35 + Math.floor(Math.random() * 35);
+                        } else {
+                            health = 1 + Math.floor(Math.random() * 34);
+                        }
+                    }
+
+                    players.push({
+                        uId: teamId * 100 + p,
+                        playerName: `Jugador${String(teamId).padStart(2,'0')}-${p+1}`,
+                        teamId: teamId,
+                        teamName: teamName,
+                        rank: baseRank,
+                        killNum: liveState !== 5 ? baseKills + p : 0,
+                        damage: 800 + Math.floor(Math.random() * 400),
+                        health: health,
+                        healthMax: 100,
+                        liveState: liveState,
+                        isOutsideBlueCircle: Math.random() > 0.85
+                    });
+                }
+            }
+
             return {
                 allinfo: {
                     gameId: "mock_game_001",
-                    TotalPlayerList: [
-                        { uId: 1, playerName: "Jugador01", teamId: 1, rank: 1, killNum: 8, damage: 1200, health: 100, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 2, playerName: "Jugador02", teamId: 2, rank: 2, killNum: 7, damage: 1100, health: 90, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 3, playerName: "Jugador03", teamId: 3, rank: 3, killNum: 6, damage: 1000, health: 80, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 4, playerName: "Jugador04", teamId: 4, rank: 4, killNum: 5, damage: 900, health: 70, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 5, playerName: "Jugador05", teamId: 5, rank: 5, killNum: 4, damage: 800, health: 60, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 6, playerName: "Jugador06", teamId: 6, rank: 6, killNum: 3, damage: 700, health: 50, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 7, playerName: "Jugador07", teamId: 7, rank: 7, killNum: 2, damage: 600, health: 40, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 8, playerName: "Jugador08", teamId: 8, rank: 8, killNum: 1, damage: 500, health: 30, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 9, playerName: "Jugador09", teamId: 9, rank: 9, killNum: 0, damage: 400, health: 20, healthMax: 100, liveState: 1, isOutsideBlueCircle: false },
-                        { uId: 10, playerName: "Jugador10", teamId: 10, rank: 10, killNum: 0, damage: 300, health: 10, healthMax: 100, liveState: 1, isOutsideBlueCircle: false }
-                    ]
+                    TotalPlayerList: players
                 }
             };
         }
 
-        function loadConfig() {
-        }
-
-        function applyConfig() {
-        }
-
+        function loadConfig() {}
+        function applyConfig() {}
         function resetConfig() {
             localStorage.removeItem('rankToPPP');
             location.reload();
         }
-
         function toggleConfigPanel() {
             const panel = document.getElementById('configPanel');
             panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
@@ -484,19 +669,14 @@
         async function fetchData() {
             try {
                 let data;
-                if (currentSimulation === 'normal') {
+                if (currentSimulation === 'normal' || currentSimulation === '5players' || currentSimulation === '2players') {
                     data = getMockData();
-                } else if (currentSimulation === '5players') {
-                    const mock = getMockData();
-                    data = { allinfo: { gameId: mock.allinfo.gameId, TotalPlayerList: mock.allinfo.TotalPlayerList.slice(0, 5) } };
-                } else if (currentSimulation === '2players') {
-                    const mock = getMockData();
-                    data = { allinfo: { gameId: mock.allinfo.gameId, TotalPlayerList: mock.allinfo.TotalPlayerList.slice(0, 2) } };
                 } else {
                     const response = await fetch('http://localhost:10086/getallinfo');
                     if (!response.ok) throw new Error('Error al obtener los datos');
                     data = await response.json();
                 }
+
                 const players = data.allinfo?.TotalPlayerList || [];
                 const realPlayers = players.filter(p => p.playerName && p.playerName.trim() !== '');
                 lastPlayerStats = realPlayers.map(p => ({
@@ -511,145 +691,307 @@
                     rank: p.rank || 999
                 }));
 
-                let displayItems = lastPlayerStats.map(p => {
-                    const ppp = rankToPPP[p.rank] || 0;
-                    const total = ppp + (p.killNum || 0);
-                    return { ...p, ppp, total };
+                const teams = {};
+                lastPlayerStats.forEach(p => {
+                    if (!teams[p.teamId]) {
+                        teams[p.teamId] = {
+                            teamId: p.teamId,
+                            teamName: p.teamName || `EQUIPO ${p.teamId}`,
+                            players: [],
+                            totalKills: 0,
+                            totalDamage: 0
+                        };
+                    }
+                    teams[p.teamId].players.push(p);
+                    teams[p.teamId].totalKills += p.killNum;
+                    teams[p.teamId].totalDamage += p.damage;
                 });
+
+                let displayItems = Object.values(teams).map(team => {
+                    const representative = team.players[0];
+                    const ppp = rankToPPP[representative.rank] || 0;
+                    const total = ppp + team.totalKills;
+                    return {
+                        teamId: team.teamId,
+                        teamName: team.teamName,
+                        players: team.players,
+                        killNum: team.totalKills,
+                        damage: team.totalDamage,
+                        ppp,
+                        total
+                    };
+                });
+
+                const hasAlivePlayers = (team) => team.players.some(p => p.liveState !== 5);
+
                 displayItems.sort((a, b) => {
                     if (b.total !== a.total) return b.total - a.total;
+                    const aIsAlive = hasAlivePlayers(a);
+                    const bIsAlive = hasAlivePlayers(b);
+                    if (aIsAlive && !bIsAlive) return -1;
+                    if (!aIsAlive && bIsAlive) return 1;
                     if (b.ppp !== a.ppp) return b.ppp - a.ppp;
                     return b.killNum - a.killNum;
                 });
 
-                const aliveItems = displayItems.filter(p => p.liveState !== 5);
+                const aliveTeams = displayItems.filter(t => t.players.some(p => p.liveState !== 5));
                 const mainOverlay = document.getElementById('mainOverlay');
                 const finalContainer = document.getElementById('finalPlayersContainer');
 
-                if (aliveItems.length <= 5 && aliveItems.length > 2) {
-                    mainOverlay.style.display = 'none';
-                    finalContainer.style.display = 'flex';
-                    finalContainer.innerHTML = '';
-                    aliveItems.forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'final-player-card';
-                        const paddedTeamId = item.teamId.toString().padStart(3, '0');
-                        const logo = document.createElement('img');
-                        logo.className = 'final-player-logo';
-                        logo.src = `logo/${paddedTeamId}.png`;
-                        logo.onerror = () => { logo.src = `logo/default.jpeg`; };
-                        const name = document.createElement('div');
-                        name.className = 'final-player-name';
-                        name.textContent = item.playerName || 'Desconocido';
-                        const healthContainer = document.createElement('div');
-                        healthContainer.className = 'final-health-bar-container';
-                        updateFinalHealthBar(healthContainer, item);
-                        card.appendChild(logo);
-                        card.appendChild(name);
-                        card.appendChild(healthContainer);
-                        finalContainer.appendChild(card);
-                    });
-                } else if (aliveItems.length <= 2) {
-                    mainOverlay.style.display = 'none';
-                    finalContainer.style.display = 'none';
+                // === CORRECCIÓN MEJORADA: Ahora oculta todo cuando queda 1 equipo ===
+                const shouldShowFinalView = aliveTeams.length >= 2 && aliveTeams.length <= 5;
+                const shouldShowTableView = aliveTeams.length > 5;
+                const shouldHideAll = aliveTeams.length <= 1;
+                
+                // Determinar la vista objetivo
+                let targetView;
+                if (shouldHideAll) {
+                    targetView = 'hidden';
+                } else if (shouldShowFinalView) {
+                    targetView = 'final';
                 } else {
-                    mainOverlay.style.display = 'flex';
-                    finalContainer.style.display = 'none';
-                    const tableBody = document.querySelector('#teamTable tbody');
-                    const topItems = displayItems.slice(0, 16);
-                    const orderedIds = topItems.map(item => item.playerId);
-                    topItems.forEach((item, index) => {
-                        const id = item.playerId;
-                        let row = tableBody.querySelector(`tr[data-player-id="${id}"]`);
-                        if (!row) {
-                            row = document.createElement('tr');
-                            row.dataset.playerId = id;
-                            row.innerHTML = `
-                                <td></td>
-                                <td><img alt="Logo" class="logo-img"></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td><div class="health-bar-container"></div></td>`;
-                            tableBody.appendChild(row);
-                        }
-                        row.cells[0].textContent = index + 1;
-                        row.cells[3].textContent = item.killNum || 0;
-                        row.cells[4].textContent = item.ppp || 0;
-                        row.cells[5].textContent = item.total || 0;
-                        const nameCell = row.cells[2];
-                        const img = row.cells[1].querySelector('img');
-                        nameCell.textContent = item.playerName || 'Desconocido';
-                        const paddedTeamId = item.teamId.toString().padStart(3, '0');
-                        img.src = `logo/${paddedTeamId}.png`;
-                        img.onerror = () => { img.src = `logo/default.jpeg`; };
-                        row.classList.toggle('eliminado', item.liveState === 5);
-                        const healthContainer = row.cells[6].querySelector('.health-bar-container');
-                        updateHealthBars(healthContainer, [item]);
-                    });
-                    tableBody.querySelectorAll('tr').forEach(row => {
-                        const id = row.dataset.playerId;
-                        if (id && !orderedIds.includes(parseInt(id))) {
-                            row.remove();
-                        }
-                    });
-                    animateReorder(tableBody, orderedIds);
+                    targetView = 'table';
                 }
+                
+                // Solo cambiar la vista si es necesario y no estamos en medio de una transición
+                if (!isTransitioning && currentViewMode !== targetView) {
+                    isTransitioning = true;
+                    
+                    if (targetView === 'hidden') {
+                        // Ocultar todo
+                        if (currentViewMode === 'table') {
+                            mainOverlay.style.opacity = '0';
+                        } else if (currentViewMode === 'final') {
+                            finalContainer.style.opacity = '0';
+                        }
+                        setTimeout(() => {
+                            mainOverlay.style.display = 'none';
+                            finalContainer.style.display = 'none';
+                            currentViewMode = 'hidden';
+                            isTransitioning = false;
+                        }, 400);
+                    } else if (targetView === 'final') {
+                        // Transición a vista final
+                        if (currentViewMode === 'table') {
+                            mainOverlay.style.opacity = '0';
+                        } else if (currentViewMode === 'hidden') {
+                            // Desde oculto, no hay nada que ocultar
+                        }
+                        setTimeout(() => {
+                            if (currentViewMode === 'table') {
+                                mainOverlay.style.display = 'none';
+                            }
+                            finalContainer.style.display = 'flex';
+                            setTimeout(() => {
+                                finalContainer.style.opacity = '1';
+                                currentViewMode = 'final';
+                                isTransitioning = false;
+                            }, 50);
+                        }, 400);
+                    } else if (targetView === 'table') {
+                        // Transición a vista tabla
+                        if (currentViewMode === 'final') {
+                            finalContainer.style.opacity = '0';
+                        } else if (currentViewMode === 'hidden') {
+                            // Desde oculto, no hay nada que ocultar
+                        }
+                        setTimeout(() => {
+                            if (currentViewMode === 'final') {
+                                finalContainer.style.display = 'none';
+                            }
+                            mainOverlay.style.display = 'flex';
+                            setTimeout(() => {
+                                mainOverlay.style.opacity = '1';
+                                currentViewMode = 'table';
+                                isTransitioning = false;
+                            }, 50);
+                        }, 400);
+                    }
+                }
+
+                // Actualizar el contenido según la vista actual
+                if (currentViewMode === 'final' && shouldShowFinalView) {
+                    updateFinalView(aliveTeams, finalContainer);
+                } else if (currentViewMode === 'table' && shouldShowTableView) {
+                    updateTableView(displayItems);
+                }
+                // Si currentViewMode es 'hidden', no actualizamos ningún contenido
             } catch (error) {
                 console.error('Error:', error);
             }
         }
 
-        function updateHealthBars(container, playerArray) {
-            const calcColor = perc => {
-                if (perc <= 20) return 'rgb(255,131,0)';
-                const r = Math.round(33 + (255 - 33) * ((100 - perc) / 80));
-                const g = Math.round(255 + (131 - 255) * ((100 - perc) / 80));
-                const b = Math.round(2 + (0 - 2) * ((100 - perc) / 80));
-                return `rgb(${r},${g},${b})`;
-            };
-            container.innerHTML = '';
-            playerArray.forEach(player => {
-                const bar = document.createElement('div');
-                bar.className = 'health-bar';
-                const perc = (player.health / player.healthMax) * 100;
-                const cls = player.liveState === 5 ? 'eliminated' :
-                            player.liveState === 6 ? 'disconnected' :
-                            player.liveState === 4 ? 'danger' : '';
-                const borderCls = player.isOutsideBlueCircle && player.liveState !== 5 ? 'outside-blue' : '';
-                if (cls) bar.classList.add(cls);
-                if (borderCls) bar.classList.add(borderCls);
-                const fill = document.createElement('div');
-                fill.className = 'health-fill';
-                fill.style.height = player.liveState === 5 ? '0%' : `${perc}%`;
-                fill.style.backgroundColor = player.liveState === 5 ? 'black' : calcColor(perc);
-                bar.appendChild(fill);
-                container.appendChild(bar);
+        function updateFinalView(aliveTeams, finalContainer) {
+            // Reutilizar tarjetas existentes cuando sea posible
+            const existingCards = finalContainer.querySelectorAll('.final-player-card');
+            const existingTeamIds = Array.from(existingCards).map(card => card.dataset.teamId);
+            const currentTeamIds = aliveTeams.map(team => team.teamId.toString());
+            
+            // Eliminar tarjetas de equipos que ya no están
+            existingCards.forEach(card => {
+                if (!currentTeamIds.includes(card.dataset.teamId)) {
+                    card.remove();
+                }
+            });
+
+            // Actualizar o crear tarjetas para equipos actuales
+            aliveTeams.forEach((item, index) => {
+                let card = finalContainer.querySelector(`.final-player-card[data-team-id="${item.teamId}"]`);
+                
+                if (!card) {
+                    card = document.createElement('div');
+                    card.className = 'final-player-card';
+                    card.dataset.teamId = item.teamId;
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    
+                    const logo = document.createElement('img');
+                    logo.className = 'final-player-logo';
+                    
+                    const healthContainer = document.createElement('div');
+                    healthContainer.className = 'final-health-bar-container';
+                    
+                    const name = document.createElement('div');
+                    name.className = 'final-player-name';
+                    
+                    card.appendChild(logo);
+                    card.appendChild(healthContainer);
+                    card.appendChild(name);
+                    finalContainer.appendChild(card);
+                }
+                
+                // Actualizar contenido
+                const paddedTeamId = String(item.teamId).padStart(3, '0');
+                const logo = card.querySelector('.final-player-logo');
+                logo.src = `logo/${paddedTeamId}.png`;
+                logo.onerror = () => { logo.src = `logo/default.jpeg`; };
+                
+                const healthContainer = card.querySelector('.final-health-bar-container');
+                healthContainer.innerHTML = '';
+                item.players.forEach(p => {
+                    updateFinalHealthBar(healthContainer, p);
+                });
+                
+                const name = card.querySelector('.final-player-name');
+                name.textContent = item.teamName || 'Desconocido';
             });
         }
 
+        function updateTableView(displayItems) {
+            const tableBody = document.querySelector('#teamTable tbody');
+            const topItems = displayItems.length >= 16 ? displayItems.slice(0, 16) : displayItems;
+            
+            while (topItems.length < 16) {
+                const fakeTeamId = 999 + topItems.length;
+                topItems.push({
+                    teamId: fakeTeamId,
+                    teamName: '',
+                    players: [],
+                    killNum: 0,
+                    damage: 0,
+                    ppp: 0,
+                    total: 0
+                });
+            }
+            
+            const orderedTeamIds = topItems.map(item => item.teamId);
+
+            // Ocultar suavemente filas que ya no están en la lista
+            tableBody.querySelectorAll('tr').forEach(row => {
+                const id = parseInt(row.dataset.teamId);
+                if (id && !orderedTeamIds.includes(id)) {
+                    row.classList.add('hidden-card');
+                    setTimeout(() => {
+                        if (row.parentNode) row.remove();
+                    }, 600);
+                }
+            });
+
+            topItems.forEach((item, index) => {
+                const teamId = item.teamId;
+                let row = tableBody.querySelector(`tr[data-team-id="${teamId}"]`);
+                if (!row) {
+                    row = document.createElement('tr');
+                    row.dataset.teamId = teamId;
+                    row.innerHTML = `
+                        <td><div class="pos-container"></div></td>
+                        <td><div class="logo-container"><img alt="Logo" class="logo-img"></div></td>
+                        <td><div class="jugador-container"></div></td>
+                        <td><div class="elim-container"></div></td>
+                        <td><div class="pp-container"></div></td>
+                        <td><div class="total-container"></div></td>
+                        <td><div class="health-container"></div></td>`;
+                    tableBody.appendChild(row);
+                    row.classList.remove('hidden-card');
+                }
+                row.querySelector('.pos-container').textContent = index + 1;
+                row.querySelector('.elim-container').textContent = item.killNum || 0;
+                row.querySelector('.pp-container').textContent = item.ppp || 0;
+                row.querySelector('.total-container').textContent = item.total || 0;
+                const nameContainer = row.querySelector('.jugador-container');
+                const img = row.querySelector('.logo-img');
+                nameContainer.textContent = item.teamName || 'Desconocido';
+                if (item.teamName) {
+                    const paddedTeamId = String(teamId).padStart(3, '0');
+                    img.src = `logo/${paddedTeamId}.png`;
+                    img.onerror = () => { img.src = `logo/default.jpeg`; };
+                } else {
+                    img.style.display = 'none';
+                    nameContainer.textContent = '';
+                }
+                row.classList.toggle('eliminado', item.players.every(p => p.liveState === 5));
+                const healthContainer = row.querySelector('.health-container');
+                healthContainer.innerHTML = '';
+                if (item.players && item.players.length > 0) {
+                    item.players.forEach(player => {
+                        const perc = (player.health / player.healthMax) * 100;
+                        const barContainer = document.createElement('div');
+                        barContainer.className = 'health-bar-container';
+                        
+                        const barFill = document.createElement('div');
+                        barFill.className = 'health-bar-fill';
+                        barFill.style.height = player.liveState === 5 ? '0%' : `${perc}%`;
+
+                        if (player.liveState === 5) {
+                            barFill.style.backgroundColor = '#818181';
+                        } else if (player.liveState === 4) {
+                            barFill.style.backgroundColor = '#ff3333';
+                            barFill.style.animation = 'redPulse 1.2s infinite';
+                        } else {
+                            barFill.style.backgroundColor = getHealthColor(perc);
+                            if (player.isOutsideBlueCircle) {
+                                barContainer.style.animation = 'borderBlink 1.2s infinite';
+                            }
+                        }
+
+                        barContainer.appendChild(barFill);
+                        healthContainer.appendChild(barContainer);
+                    });
+                }
+            });
+
+            animateReorder(tableBody, orderedTeamIds);
+        }
+
         function updateFinalHealthBar(container, player) {
-            const calcColor = perc => {
-                if (perc <= 20) return 'rgb(255,131,0)';
-                const r = Math.round(33 + (255 - 33) * ((100 - perc) / 80));
-                const g = Math.round(255 + (131 - 255) * ((100 - perc) / 80));
-                const b = Math.round(2 + (0 - 2) * ((100 - perc) / 80));
-                return `rgb(${r},${g},${b})`;
-            };
             const bar = document.createElement('div');
             bar.className = 'final-health-bar';
             const perc = (player.health / player.healthMax) * 100;
-            const cls = player.liveState === 5 ? 'eliminated' :
-                        player.liveState === 6 ? 'disconnected' :
-                        player.liveState === 4 ? 'danger' : '';
-            const borderCls = player.isOutsideBlueCircle && player.liveState !== 5 ? 'outside-blue' : '';
-            if (cls) bar.classList.add(cls);
+            const borderCls = player.isOutsideBlueCircle && player.liveState !== 5 && player.liveState !== 4 ? 'outside-blue' : '';
             if (borderCls) bar.classList.add(borderCls);
+
             const fill = document.createElement('div');
             fill.className = 'final-health-fill';
             fill.style.height = player.liveState === 5 ? '0%' : `${perc}%`;
-            fill.style.backgroundColor = player.liveState === 5 ? 'black' : calcColor(perc);
+
+            if (player.liveState === 5) {
+                fill.style.backgroundColor = 'black';
+            } else if (player.liveState === 4) {
+                fill.style.backgroundColor = '#ff3333';
+                fill.style.animation = 'redPulse 1.2s infinite';
+            } else {
+                fill.style.backgroundColor = getHealthColor(perc);
+            }
+
             bar.appendChild(fill);
             container.appendChild(bar);
         }
@@ -658,19 +1000,19 @@
             const rows = Array.from(tableBody.children);
             const firstPositions = new Map();
             rows.forEach(row => {
-                if (row.dataset.playerId) {
-                    firstPositions.set(row.dataset.playerId, row.getBoundingClientRect().top);
+                if (row.dataset.teamId) {
+                    firstPositions.set(row.dataset.teamId, row.getBoundingClientRect().top);
                 }
             });
             orderedIds.forEach(id => {
-                const row = tableBody.querySelector(`tr[data-player-id="${id}"]`);
+                const row = tableBody.querySelector(`tr[data-team-id="${id}"]`);
                 if (row) tableBody.appendChild(row);
             });
             requestAnimationFrame(() => {
                 rows.forEach(row => {
-                    if (row.dataset.playerId) {
+                    if (row.dataset.teamId) {
                         const lastTop = row.getBoundingClientRect().top;
-                        const firstTop = firstPositions.get(row.dataset.playerId);
+                        const firstTop = firstPositions.get(row.dataset.teamId);
                         if (firstTop !== undefined) {
                             const deltaY = firstTop - lastTop;
                             row.style.transform = `translateY(${deltaY}px)`;
@@ -680,7 +1022,7 @@
                 });
                 requestAnimationFrame(() => {
                     rows.forEach(row => {
-                        if (row.dataset.playerId) {
+                        if (row.dataset.teamId) {
                             row.style.transition = 'transform 0.6s ease';
                             row.style.transform = 'translateY(0)';
                         }
